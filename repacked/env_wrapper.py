@@ -1,9 +1,9 @@
-from gym import wrappers
+from gym import wrappers, Env
 import os
 
 
 class EnvWrapper(object):
-    def __init__(self, gym_env, steps=None):
+    def __init__(self, gym_env: Env, steps=None):
         self.env = gym_env
         if steps is not None:
             self.env._max_episode_steps = steps

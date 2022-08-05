@@ -10,7 +10,7 @@ FPS = 25
 # Number of episodes to train for
 EPISODES = 500
 # Number of steps per episode
-STEPS = 100000
+STEPS = 1000
 
 # Torch device (CUDA if available)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -32,17 +32,20 @@ TARGET_FREQ = 4
 # frequency in STEPS
 UPDATE_FREQ = 1
 # Learning rate
-LR = 0.00015
+LR = 0.0002
 # Batch size
 BATCH_SIZE = 256
 # Environment name
-ENV_NAME = 'Pong-v4'
+ENV_NAME = 'Pong-ram-v4'
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
 # of H units
-NUM_H = 2
+NUM_H = 1
 # Number of units in hidden
 # layers
-H = 64
+H = 16
 # ### HYPER PARAMETERS END #######
+
+
+WARMUP = 100

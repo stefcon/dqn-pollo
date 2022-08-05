@@ -11,9 +11,11 @@ class DQN(nn.Module):
             nn.Linear(self.state_size, h, dtype=torch.float32),
             nn.ReLU()
         ]
+
         for _ in range(num_hidden):
             modules.append(nn.Linear(h, h, dtype=torch.float32))
             modules.append(nn.ReLU())
+
         modules.append(nn.Linear(h, self.action_size, dtype=torch.float32))
 
         super(DQN, self).__init__()

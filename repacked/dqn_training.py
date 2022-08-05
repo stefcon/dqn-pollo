@@ -54,15 +54,15 @@ def train():
         state = env.reset()
         cum_rew = 0
 
-        if episode > 10 and episode % TARGET_FREQ == 0:
+        if episode > WARMUP and episode % TARGET_FREQ == 0:
             agent.update_target_model()
 
         # Loop inside one game episode
         for t in range(STEPS):
             
             # Display the game. Comment bellow line in order to get faster training.
-            if episode > 140:
-                env.render()
+            # if episode > 11:
+            #     env.render()
             
             if random.random() <= epsilon:
                 action = env.env.action_space.sample()
@@ -78,13 +78,13 @@ def train():
             agent.remember(state=state, action=action, reward=reward, next_state=next_state, done=float(done))
             
             # Update Q-values
-            if episode > 10 and (episode + t) % UPDATE_FREQ == 0:
+            if episode > WARMUP and (episode + t) % UPDATE_FREQ == 0:
                 # Q-value update
                 td_error = agent.backward()
                 td_errors.append(td_error)
 
             if done or (t == STEPS - 1):
-                if episode > 10:
+                if episode > WARMUP:
                     print("EPISODE: {0: <4}/{1: >4} | EXPLORE RATE: {2: <7.4f} | SCORE: {3: <7.1f}"
                         " | TD ERROR: {4: <5.2f} ".format(episode + 1, EPISODES, epsilon, cum_rew, td_error))
                 else:

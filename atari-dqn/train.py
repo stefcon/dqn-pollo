@@ -1,9 +1,10 @@
 import gym
 
+from consts import *
 
 def initialize():
     print("INITIALIZING!")
-    env = gym.make("Pong-v4", new_step_api=True)
+    env = gym.make(ENV_NAME, new_step_api=True)
 
 
 def train():

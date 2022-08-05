@@ -10,8 +10,7 @@ from rb import ReplayBuffer
 
 
 class DQNAgent(object):
-    def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=2,
-                 hidden_units=64):
+    def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=1, hidden_units=64):
         self.action_size = action_size
         self.state_size = state_size
         self.gamma = gamma
@@ -52,7 +51,6 @@ class DQNAgent(object):
 
     def select_action(self, state):
         # Getting "greedy" action
-        print(state.shape)
         action = torch.argmax(self.current(state)).item()
         return action
 
