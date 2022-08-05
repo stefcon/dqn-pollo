@@ -29,7 +29,7 @@ run_name = create_run_name(
     )
 
 def train():
-    env = EnvWrapper(gym_env=gym.make(ENV_NAME, render_mode='human'), steps=STEPS)
+    env = EnvWrapper(gym_env=gym.make(ENV_NAME), steps=STEPS)
     # Initialize Q networks, replay memory
     agent = DQNAgent(
         state_size=env.state_size(),

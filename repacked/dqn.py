@@ -52,6 +52,7 @@ class DQNAgent(object):
 
     def select_action(self, state):
         # Getting "greedy" action
+        print(state.shape)
         action = torch.argmax(self.current(state)).item()
         return action
 

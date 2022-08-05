@@ -36,7 +36,7 @@ LR = 0.00015
 # Batch size
 BATCH_SIZE = 256
 # Environment name
-ENV_NAME = 'ALE/Pong-v5'
+ENV_NAME = 'Pong-v4'
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
