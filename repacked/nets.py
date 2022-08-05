@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from consts import WINDOW_HEIGHT, WINDOW_WIDTH
+from consts import *
 
 from torchsummary import summary
 
@@ -45,7 +45,7 @@ class DQN(nn.Module):
         modules.append(nn.Linear(h, self.action_size, dtype=torch.float32))
 
         super(DQN, self).__init__()
-        self.neuralnet = nn.Sequential(*modules)
+        self.neuralnet = nn.Sequential(*modules).to(DEVICE)
 
         print("IS IT")
         summary(self.neuralnet, input_size=(3, 210, 160))
