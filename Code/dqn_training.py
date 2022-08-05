@@ -49,12 +49,12 @@ def train():
     best_network = None # State dict of the best network
     td_errors = []
     start = time.time()
+    decay_step = 0
     random.seed(0)
 
     for episode in range(EPISODES):
         # Start game/episode
         state = env.reset()
-        decay_step = 0
         cum_rew = 0
 
         if episode > 10 and episode % TARGET_FREQ == 0:
@@ -64,8 +64,8 @@ def train():
         for t in range(STEPS):
             decay_step += 1
             # Display the game. Comment bellow line in order to get faster training.
-            if episode > 140:
-                env.render()
+            # if episode > 140:
+            #     env.render()
             
             if random.random() <= epsilon:
                 action = env.env.action_space.sample()

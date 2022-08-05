@@ -11,11 +11,12 @@ from rb import ReplayBuffer
 
 class DQNAgent(object):
     def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=2,
-                 hidden_units=64, exp_decay=True):
+                 hidden_units=64, exp_decay=True, is_double=False):
         self.action_size = action_size
         self.state_size = state_size
-        self.exp_decay = exp_decay 
         self.gamma = gamma
+        self.exp_decay = exp_decay
+        self.is_double = is_double
         self.name = 'DQN'
 
         # We create "live" and "target" networks from the original paper.
@@ -65,9 +66,18 @@ class DQNAgent(object):
 
         # Calculating target value with the "stale" network
         with torch.no_grad():
-            q_values = self.target(next_states)
-            q_opt_t = torch.max(q_values, dim=1)[0]
-            qs_target = torch.squeeze(rewards) + (1 - torch.squeeze(dones))*self.gamma * q_opt_t
+            if self.is_double:
+                # Double DQN
+                next_best_actions = self.select_action(next_states)
+                next_best_one_hot = torch.squeeze(
+                    torch.nn.functional.one_hot(next_best_actions, num_classes=self.action_size))
+                q_target_ = torch.sum(self.target(next_states)*next_best_one_hot, dim=1)
+            else:    
+                # Vanilla DQN
+                q_values = self.target(next_states)
+                q_target_ = torch.max(q_values, dim=1)[0]
+
+        qs_target = torch.squeeze(rewards) + (1 - torch.squeeze(dones))*self.gamma * q_target_
 
         # We calculate the absolute difference between current and target values q values,
         # which is useful info for debugging.
@@ -79,5 +89,7 @@ class DQNAgent(object):
         self.optimizer.zero_grad()
         loss = (torch.nn.functional.mse_loss(qs_selected, qs_target)).mean()
         loss.backward()
+        # Limiting gradient step by clipping
+        torch.nn.utils.clip_grad_norm(self.current.parameters(), 1)
         self.optimizer.step()
         return torch.mean(td_error).item()

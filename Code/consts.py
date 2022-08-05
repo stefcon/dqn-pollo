@@ -26,7 +26,7 @@ EPSILON_DECAY = 0.00002 # 0.05
 # Exponential decay indicator
 EXP_DECAY = True
 # Discount rate
-GAMMA = 0.98
+GAMMA = 0.95
 # DQN Target network update
 # frequency in EPISODES
 TARGET_FREQ = 4
@@ -34,13 +34,13 @@ TARGET_FREQ = 4
 # frequency in STEPS
 UPDATE_FREQ = 1
 # Learning rate
-LR = 0.00005 # 0.00015
+LR = 0.0005 # 0.00015
 # Batch size
-BATCH_SIZE = 64 #256
+BATCH_SIZE = 256
 # Environment name
 ENV_NAME = 'ALE/Pong-ram-v5'
 # Folder name for storing best models
-BEST_MODELS = 'best_models'
+BEST_MODELS = './best_models'
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
