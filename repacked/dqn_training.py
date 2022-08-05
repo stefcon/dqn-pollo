@@ -101,7 +101,7 @@ def train():
 
             state = next_state
 
-        if epsilon > EPSILON_END:
+        if episode > WARMUP and epsilon > EPSILON_END:
             epsilon *= EPSILON_DECAY
 
     end = time.time()

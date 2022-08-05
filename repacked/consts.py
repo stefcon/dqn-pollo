@@ -36,16 +36,19 @@ LR = 0.0002
 # Batch size
 BATCH_SIZE = 256
 # Environment name
-ENV_NAME = 'Pong-ram-v4'
+ENV_NAME = 'Pong-v4'
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
 # of H units
-NUM_H = 1
+NUM_H = 3
 # Number of units in hidden
 # layers
 H = 16
 # ### HYPER PARAMETERS END #######
 
 
-WARMUP = 100
+WARMUP = 1
+
+WINDOW_HEIGHT = 210
+WINDOW_WIDTH = 160
