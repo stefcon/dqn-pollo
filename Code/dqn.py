@@ -11,9 +11,10 @@ from rb import ReplayBuffer
 
 class DQNAgent(object):
     def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=2,
-                 hidden_units=64):
+                 hidden_units=64, exp_decay=True):
         self.action_size = action_size
         self.state_size = state_size
+        self.exp_decay = exp_decay 
         self.gamma = gamma
         self.name = 'DQN'
 
