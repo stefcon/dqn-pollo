@@ -53,7 +53,7 @@ def train():
 
     epsilon = EPSILON_START
     results = []
-    best_cum_rew = None # We will store only the best model (DQN can have "catastrophic forgetting")
+    best_mean_rew = None # We will store only the best model (DQN can have "catastrophic forgetting")
     best_network = None # State dict of the best network
 
     td_errors = []
@@ -112,12 +112,13 @@ def train():
                 results.append(cum_rew)
 
                 # Save the best model
-                if episode > ROLLING_PERIOD and \
-                (best_cum_rew is None or best_cum_rew < moving_average(results[-ROLLING_PERIOD:], ROLLING_PERIOD)[0]):
-                            best_network = agent.current.state_dict()
-                            best_cum_rew = cum_rew
-                            if best_cum_rew is not None:
-                                print(f'Best mean reward updated {best_cum_rew:.3f}')
+                if episode > ROLLING_PERIOD:
+                    mean_reward = moving_average(results[-ROLLING_PERIOD:], ROLLING_PERIOD)[0]
+                    if best_mean_rew is None or best_mean_rew < mean_reward:
+                                best_network = agent.current.state_dict()
+                                best_mean_rew = mean_reward
+                                if best_mean_rew is not None:
+                                    print(f'Best mean reward updated {best_mean_rew:.3f}')
                 if done:
                     break
             
