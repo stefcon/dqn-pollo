@@ -48,8 +48,14 @@ DOUBLE = True
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
 # of H units
-NUM_H = 2
+NUM_H = 3
 # Number of units in hidden
 # layers
-H = 64
+H = 16
 # ### HYPER PARAMETERS END #######
+
+
+WARMUP = 100
+
+WINDOW_HEIGHT = 210
+WINDOW_WIDTH = 160

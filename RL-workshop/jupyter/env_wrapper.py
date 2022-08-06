@@ -1,16 +1,13 @@
-from gym import wrappers, Env
+from gym import wrappers
 import os
 
 
 class EnvWrapper(object):
-    def __init__(self, gym_env, frame_num=1, steps=None):
+    def __init__(self, gym_env, steps=None):
         self.env = gym_env
-        self.frame_num = frame_num
         if steps is not None:
             self.env._max_episode_steps = steps
-        self.env = wrappers.RecordVideo(
-            self.env, os.path.join('./video_folder/', self.env.spec.id), 
-            episode_trigger= lambda x: x % 50 == 0, new_step_api=True)
+        wrappers.Monitor(self.env, os.path.join('./tmp_deep_rl/', self.env.spec.id), force=True)
 
     def state_size(self):
         return self.env.observation_space.shape[0]
@@ -27,7 +24,7 @@ class EnvWrapper(object):
         else:
             return 1
 
-    # Displays current state
+    #   Displays current state
     def render(self):
         self.env.render()
 
@@ -36,8 +33,5 @@ class EnvWrapper(object):
         return state
 
     def step(self, action):
-        # Repeat the action across frame_num frames
-        for _ in range(self.frame_num):
-            # Deprecated; new return format: next_state, reward, done, truncated, info
-            next_state, reward, done, truncated, _ = self.env.step(action)
-        return next_state, reward, done or truncated
+        next_state, reward, done, _ = self.env.step(action)
+        return next_state, reward, done
