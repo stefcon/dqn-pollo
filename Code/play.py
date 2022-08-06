@@ -29,18 +29,11 @@ def play(model, visualize=True):
     state = env.reset()
     total_reward = 0.0
 
-    for t in range(STEPS):
-        start_ts = time.time()
-        if visualize:
-            env.render()
-
+    for _ in range(STEPS):
         action = agent.select_action(torch.from_numpy(state).to(DEVICE).detach())
         next_state, reward, done = env.step(action)
         total_reward += reward
-        if visualize:
-            delta = 1/FPS - (time.time() - start_ts)
-            if delta > 0:
-                time.sleep(delta)
+
         if done:
             break
         state = next_state

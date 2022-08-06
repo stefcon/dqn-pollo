@@ -7,13 +7,14 @@ from dqn import DQNAgent
 from env_wrapper import EnvWrapper
 from consts import *
 
+import numpy as np
 import torch
 import gym
 
 
 run_name = create_run_name(
         alg='DQN',
-        env=ENV_NAME,
+        env='lander',
         num_layers=NUM_H,
         hidden_dim=H,
         eps_start=EPSILON_START,
@@ -29,7 +30,7 @@ run_name = create_run_name(
     )
 
 def train():
-    env = EnvWrapper(gym_env=gym.make(ENV_NAME), steps=STEPS)
+    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS)
     # Initialize Q networks, replay memory
     agent = DQNAgent(
         state_size=env.state_size(),
@@ -38,15 +39,17 @@ def train():
         batch_size=BATCH_SIZE,
         lr=LR,
         num_hidden=NUM_H,
-        hidden_units=H
+        hidden_units=H,
+        exp_decay=EXP_DECAY
     )
 
     epsilon = EPSILON_START
     results = []
-    best_cum_rew = -1 # We will store only the best model (DQN can have "catastrophic forgetting")
+    best_cum_rew = None # We will store only the best model (DQN can have "catastrophic forgetting")
     best_network = None # State dict of the best network
     td_errors = []
     start = time.time()
+    decay_step = 0
     random.seed(0)
 
     for episode in range(EPISODES):
@@ -59,9 +62,9 @@ def train():
 
         # Loop inside one game episode
         for t in range(STEPS):
-            
+            decay_step += 1
             # Display the game. Comment bellow line in order to get faster training.
-            # if episode > 11:
+            # if episode > WARMUP:
             #     env.render()
             
             if random.random() <= epsilon:
@@ -91,7 +94,9 @@ def train():
                     print("EPISODE: {0: <4}/{1: >4} | EXPLORE RATE: {2: <7.4f} | SCORE: {3: <7.1f}"
                         " | WARMUP - NO TD ERROR".format(episode + 1, EPISODES, epsilon, cum_rew))
                 results.append(cum_rew)
-                if best_cum_rew is None or best_cum_rew <= cum_rew:
+
+                # Save the best model
+                if best_cum_rew is None or best_cum_rew < cum_rew:
                             best_network = agent.current.state_dict()
                             best_cum_rew = cum_rew
                             if best_cum_rew is not None:
@@ -101,14 +106,19 @@ def train():
 
             state = next_state
 
-        if episode > WARMUP and epsilon > EPSILON_END:
-            epsilon *= EPSILON_DECAY
+        if episode > WARMUP:
+            if agent.exp_decay:
+                # Exponential epsilon decay:
+                epsilon = EPSILON_END + (EPSILON_START - EPSILON_END) * np.exp(-EPSILON_DECAY * decay_step)
+            else:
+                if epsilon > EPSILON_END:
+                    epsilon *= (1-EPSILON_DECAY)
 
     end = time.time()
     total_time = end - start
 
     # Saving parameters for model with biggest cumulative reward
-    torch.save(best_network, run_name + '-best.dat')
+    torch.save(best_network, os.path.join(BEST_MODELS,run_name + '-best.dat'))
 
     print()
     print("TOTAL EPISODES: {0: <4} | TOTAL UPDATE STEPS: {1: <7} | TOTAL TIME [s]: {2: <7.2f}"

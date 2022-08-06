@@ -10,10 +10,12 @@ from rb import ReplayBuffer
 
 
 class DQNAgent(object):
-    def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=1, hidden_units=64):
+    def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=2, hidden_units=64, exp_decay=True, is_double=False):
         self.action_size = action_size
         self.state_size = state_size
         self.gamma = gamma
+        self.exp_decay = exp_decay
+        self.is_double = is_double
         self.name = 'DQN'
 
         # We create "live" and "target" networks from the original paper.
@@ -42,9 +44,7 @@ class DQNAgent(object):
 
     def sample(self):
         states, actions, next_states, rewards, dones = self.rb.sample(self.batch_size)
-        one_hot_acts = torch.squeeze(
-            torch.nn.functional.one_hot(actions, num_classes=self.action_size))
-        return states, one_hot_acts, rewards, next_states, dones
+        return states, actions, rewards, next_states, dones
 
     def update_target_model(self):
         self.target.load_state_dict(self.current.state_dict())
@@ -59,13 +59,22 @@ class DQNAgent(object):
         states, actions, rewards, next_states, dones = self.sample()
 
         # Gathering Q-values by looking what actions were taken in the past with current network
-        qs_selected = torch.sum(self.current(states)*actions, dim=1)
+        # qs_selected = torch.sum(self.current(states)*actions, dim=1)
+        qs_selected = self.current(states).gather(1, actions).squeeze()
 
         # Calculating target value with the "stale" network
         with torch.no_grad():
-            q_values = self.target(next_states)
-            q_opt_t = torch.max(q_values, dim=1)[0]
-            qs_target = torch.squeeze(rewards) + (1 - torch.squeeze(dones))*self.gamma * q_opt_t
+            if self.is_double:
+                # Double DQN
+                next_best_actions = self.select_action(next_states)
+                q_target_ = self.target(next_states).gather(1, next_best_actions)
+                # q_target_ = q_target_.view(BATCH_SIZE, 1)
+            else:    
+                # Vanilla DQN
+                q_values = self.target(next_states)
+                q_target_ = torch.max(q_values, dim=1)[0]
+
+        qs_target = torch.squeeze(rewards) + (1 - torch.squeeze(dones)) * self.gamma * q_target_
 
         # We calculate the absolute difference between current and target values q values,
         # which is useful info for debugging.
@@ -77,5 +86,7 @@ class DQNAgent(object):
         self.optimizer.zero_grad()
         loss = (torch.nn.functional.mse_loss(qs_selected, qs_target)).mean()
         loss.backward()
+        # Limiting gradient step by clipping
+        # torch.nn.utils.clip_grad_norm(self.current.parameters().unsqueeze(), 1)
         self.optimizer.step()
         return torch.mean(td_error).item()
