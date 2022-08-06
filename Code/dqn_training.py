@@ -15,7 +15,7 @@ import gym
 
 run_name = create_run_name(
         alg='DQN',
-        env='stick',
+        env='lander',
         num_layers=NUM_H,
         hidden_dim=H,
         eps_start=EPSILON_START,
@@ -150,4 +150,7 @@ def train():
 
 
 if __name__ == "__main__":
-    train()
+    for lr in [0.001,0.0015,0.002]:
+        # Experimenting with learning rate
+        LR = lr
+        train()
