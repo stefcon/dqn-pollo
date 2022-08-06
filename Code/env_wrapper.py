@@ -7,7 +7,8 @@ class EnvWrapper(object):
         self.env = gym_env
         if steps is not None:
             self.env._max_episode_steps = steps
-        wrappers.RecordVideo(self.env, os.path.join('./video_folder/', self.env.spec.id), episode_trigger= lambda x: x % 30 == 0)
+        wrappers.RecordVideo(self.env, os.path.join('./video_folder/', self.env.spec.id), episode_trigger= lambda x: x % 30 == 0,
+        new_step_api=True)
 
     def state_size(self):
         return self.env.observation_space.shape[0]
@@ -34,5 +35,5 @@ class EnvWrapper(object):
 
     def step(self, action):
         # Deprecated; new return format: next_state, reward, done, truncated, info
-        next_state, reward, done, _ = self.env.step(action)
-        return next_state, reward, done 
+        next_state, reward, done, truncated, _ = self.env.step(action)
+        return next_state, reward, done or truncated

@@ -3,14 +3,11 @@ import torch
 # Path for storing training info (should have better organisation)
 STORE_PATH = './tmp_dqn_learning'
 
-# Frames per second for rendering what's happening on screen
-FPS = 25
-
 # ### EPISODE ###################
 # Number of episodes to train for
-EPISODES = 1000
+EPISODES = 500
 # Number of steps per episode
-STEPS = 100000
+STEPS = 1000
 
 # Torch device (CUDA if available)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -38,7 +35,7 @@ LR = 0.0005 # 0.00015
 # Batch size
 BATCH_SIZE = 256
 # Environment name
-ENV_NAME = 'ALE/Pong-ram-v5'
+ENV_NAME = 'LunarLander-v2' #'ALE/Pong-ram-v5'
 # Folder name for storing best models
 BEST_MODELS = './best_models'
 
