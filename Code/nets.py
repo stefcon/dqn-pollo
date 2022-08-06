@@ -24,5 +24,5 @@ class DQN(nn.Module):
         self.neuralnet = nn.Sequential(*modules).to(DEVICE)
 
     def forward(self, x):
-        x = x.type(torch.float32).view((-1, 3, WINDOW_HEIGHT, WINDOW_WIDTH))
+        x = x.type(torch.float32)
         return self.neuralnet(x)
