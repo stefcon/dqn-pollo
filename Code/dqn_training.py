@@ -74,12 +74,6 @@ def train():
         # Loop inside one game episode
         for t in range(STEPS):
             decay_step += 1
-<<<<<<< HEAD
-=======
-            # Display the game. Comment bellow line in order to get faster training.
-            # if episode > WARMUP:
-            #     env.render()
->>>>>>> lazarg/main
             
             # Choose next action for the agent to take
             # Unsqueezing since select_action expects dim=2 tensors!
@@ -93,11 +87,7 @@ def train():
             agent.remember(state=state, action=action, reward=reward, next_state=next_state, done=float(done))
             
             # Update Q-values
-<<<<<<< HEAD
-            if episode > WARMUP and (episode*STEPS + t) % UPDATE_FREQ == 0:
-=======
-            if episode > WARMUP and (episode + t) % UPDATE_FREQ == 0:
->>>>>>> lazarg/main
+            if episode > 10 and (episode + t) % UPDATE_FREQ == 0:
                 # Q-value update
                 td_error = agent.backward()
                 td_errors.append(td_error)
@@ -130,19 +120,7 @@ def train():
             # Transitions to agent's next state
             state = next_state
 
-<<<<<<< HEAD
-        # Execute epsilon decay for agents exploration policy (at the end of an episode)
         epsilon = agent.epsilon_decay(epsilon, decay_step)
-
-=======
-        if episode > WARMUP:
-            if agent.exp_decay:
-                # Exponential epsilon decay:
-                epsilon = EPSILON_END + (EPSILON_START - EPSILON_END) * np.exp(-EPSILON_DECAY * decay_step)
-            else:
-                if epsilon > EPSILON_END:
-                    epsilon *= (1-EPSILON_DECAY)
->>>>>>> lazarg/main
 
     end = time.time()
     total_time = end - start
