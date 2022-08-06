@@ -12,8 +12,8 @@ import torch
 import gym
 
 
-def play(model, visualize=True):
-    env = EnvWrapper(gym_env=gym.make(ENV_NAME, render_mode='human'), steps=STEPS)
+def play(model):
+    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True, render_mode='human'), steps=STEPS)
     agent = DQNAgent(
         state_size=env.state_size(),
         action_size=env.action_size(),
@@ -30,7 +30,7 @@ def play(model, visualize=True):
     total_reward = 0.0
 
     for _ in range(STEPS):
-        action = agent.select_action(torch.from_numpy(state).to(DEVICE).detach())
+        action = agent.select_action(torch.from_numpy(state).unsqueeze(0).to(DEVICE).detach()).item()
         next_state, reward, done = env.step(action)
         total_reward += reward
 
@@ -41,17 +41,12 @@ def play(model, visualize=True):
 
 if __name__ == '__main__':
     model = None
-    visualize = True
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-m','--model', type=str, required=True)
-    parser.add_argument('-v','--visualize', type=bool, required=False)
     # Parse the argument
     args = parser.parse_args()
     
     model = args.model
-    if args.visualize is not None:
-        visualize = args.visualize
 
-    play(model, visualize)
+    play(model)

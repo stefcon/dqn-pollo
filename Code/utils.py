@@ -4,20 +4,23 @@ import matplotlib as mpl
 
 mpl.rcParams['agg.path.chunksize'] = 1500
 
+def moving_average(x, size):
+    return np.convolve(np.asarray(x), np.ones(size) / size, 'valid')
 
 def smooth_result(result, factor=10):
     result = np.array(result)
     size = int(result.shape[0] / factor)
-    result = np.convolve(result, np.ones(size) / size, mode='valid')
+    result = moving_average(result, size)
     return result
-
 
 def create_run_name(alg, env, num_layers, hidden_dim, eps_start,
                     eps_end, decay, gamma, batch_size, lr, num_ep, num_step, updt_freq=None,
-                    sw_freq=None):
+                    sw_freq=None, is_double=False):
 
     name = str(alg) + '_' + str(env) + '_' + str(num_layers) + '_x_' + str(hidden_dim)
     name += '_eps-' + str(round(eps_start, 1)) + '_' + str(round(eps_end, 4)) + '_' + str(round(decay, 3))
+    if is_double:
+        name += '_double'
     name += '_gamma-' + str(round(gamma, 2)) + '_lr-' + str(round(lr, 4)) + '_batch-' + str(batch_size)
     name += '_ep-' + str(num_ep) + '_x_' + str(num_step)
 
@@ -30,7 +33,6 @@ def create_run_name(alg, env, num_layers, hidden_dim, eps_start,
 
 
 def visualize_result(returns, td_errors, policy_errors=None):
-
     if policy_errors is None:
         fig, (ax1, ax2) = plt.subplots(2, figsize=[6.4, 6], gridspec_kw={'height_ratios': [2, 1]})
         ax3 = None

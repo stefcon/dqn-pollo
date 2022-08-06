@@ -11,10 +11,13 @@ from rb import ReplayBuffer
 
 class DQNAgent(object):
     def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=2,
-                 hidden_units=64, exp_decay=True, is_double=False):
+                 hidden_units=64, eps_start=1, eps_end=0.2, decay=0.05, exp_decay=False, is_double=False):
         self.action_size = action_size
         self.state_size = state_size
         self.gamma = gamma
+        self.eps_start = eps_start
+        self.eps_end = eps_end
+        self.decay = decay
         self.exp_decay = exp_decay
         self.is_double = is_double
         self.name = 'DQN'
@@ -51,16 +54,37 @@ class DQNAgent(object):
         self.target.load_state_dict(self.current.state_dict())
 
     def select_action(self, state):
-        # Getting "greedy" action
-        action = torch.argmax(self.current(state)).item()
+        """
+        Getting "greedy" action
+        """
+        # We add a dimension, so that it works for batches out of the box
+        action = torch.argmax(self.current(state), dim=1)
         return action
+
+    def eps_action(self, env, state, epsilon):
+        """
+        Choosing epsilon-greedy action
+        """
+        if random.random() <= epsilon:
+            return env.env.action_space.sample()
+        # Action selection
+        return self.select_action(state=torch.from_numpy(state).unsqueeze(0).to(DEVICE).detach()).item()
+
+    def epsilon_decay(self, curr_eps, decay_step):
+        if self.exp_decay:
+            # Exponential epsilon decay:
+            return self.eps_end + (self.eps_start - self.eps_end) * np.exp(-self.decay * decay_step)
+        else:
+            # Linear decay
+            if curr_eps > EPSILON_END:
+                curr_eps = max(curr_eps * (1-EPSILON_DECAY), EPSILON_END)
+            return curr_eps
 
     def backward(self):
         # Sample mini-batch of stored transitions from the replay buffer
         states, actions, rewards, next_states, dones = self.sample()
 
         # Gathering Q-values by looking what actions were taken in the past with current network
-        # qs_selected = torch.sum(self.current(states)*actions, dim=1)
         qs_selected = self.current(states).gather(1, actions).squeeze()
 
         # Calculating target value with the "stale" network
@@ -68,14 +92,13 @@ class DQNAgent(object):
             if self.is_double:
                 # Double DQN
                 next_best_actions = self.select_action(next_states)
-                q_target_ = self.target(next_states).gather(1, next_best_actions)
-                # q_target_ = q_target_.view(BATCH_SIZE, 1)
+                q_target_ = self.target(next_states).gather(1, next_best_actions.unsqueeze(1))
             else:    
                 # Vanilla DQN
                 q_values = self.target(next_states)
                 q_target_ = torch.max(q_values, dim=1)[0]
 
-        qs_target = torch.squeeze(rewards) + (1 - torch.squeeze(dones)) * self.gamma * q_target_
+        qs_target = rewards.squeeze() + (1 - dones.squeeze()) * self.gamma * q_target_.squeeze()
 
         # We calculate the absolute difference between current and target values q values,
         # which is useful info for debugging.
@@ -88,6 +111,6 @@ class DQNAgent(object):
         loss = (torch.nn.functional.mse_loss(qs_selected, qs_target)).mean()
         loss.backward()
         # Limiting gradient step by clipping
-        # torch.nn.utils.clip_grad_norm(self.current.parameters().unsqueeze(), 1)
+        torch.nn.utils.clip_grad_norm_(self.current.parameters(), 1)
         self.optimizer.step()
         return torch.mean(td_error).item()
