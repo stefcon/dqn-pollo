@@ -74,6 +74,7 @@ def train():
         # Loop inside one game episode
         for t in range(STEPS):
             decay_step += 1
+            
             # Display the game. Comment bellow line in order to get faster training.
             # if episode > WARMUP:
             #     env.render()
