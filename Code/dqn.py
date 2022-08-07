@@ -39,7 +39,7 @@ class DQNAgent(object):
 
     def init_rb(self):
         # Replay buffer initialization.
-        replay_buffer = ReplayBuffer(1e5, obs_dtype=np.float32, act_dtype=np.int64, default_dtype=np.float32)
+        replay_buffer = ReplayBuffer(REPLAY_SIZE, obs_dtype=np.float32, act_dtype=np.int64, default_dtype=np.float32)
         return replay_buffer
 
     def remember(self, state, action, reward, next_state, done):
@@ -77,7 +77,7 @@ class DQNAgent(object):
         else:
             # Linear decay
             if curr_eps > self.eps_end:
-                curr_eps = max(curr_eps * (1-self.epsilon_decay), self.eps_end)
+                curr_eps = max(curr_eps * (1-self.decay), self.eps_end)
             return curr_eps
 
     def backward(self):
