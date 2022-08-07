@@ -31,7 +31,7 @@ def train():
             sw_freq=TARGET_FREQ,
             is_double=DOUBLE
         )
-    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS)
+    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS, run_name=run_name)
     # Initialize Q networks, replay memory
     agent = DQNAgent(
         state_size=env.state_size(),
