@@ -45,6 +45,8 @@ WARMUP = 100
 ROLLING_PERIOD = 50
 # Using Double Q-Learning
 DOUBLE = True
+# Size of replay buffer
+REPLAY_SIZE = 5e5
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers

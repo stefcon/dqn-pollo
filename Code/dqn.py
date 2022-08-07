@@ -39,7 +39,7 @@ class DQNAgent(object):
 
     def init_rb(self):
         # Replay buffer initialization.
-        replay_buffer = ReplayBuffer(1e5, obs_dtype=np.float32, act_dtype=np.int64, default_dtype=np.float32)
+        replay_buffer = ReplayBuffer(REPLAY_SIZE, obs_dtype=np.float32, act_dtype=np.int64, default_dtype=np.float32)
         return replay_buffer
 
     def remember(self, state, action, reward, next_state, done):
