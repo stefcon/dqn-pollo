@@ -13,25 +13,24 @@ from torch.utils.tensorboard import SummaryWriter
 import gym
 
 
-run_name = create_run_name(
-        alg='DQN',
-        env='lander',
-        num_layers=NUM_H,
-        hidden_dim=H,
-        eps_start=EPSILON_START,
-        eps_end=EPSILON_END,
-        decay=EPSILON_DECAY,
-        gamma=GAMMA,
-        batch_size=BATCH_SIZE,
-        lr=LR,
-        num_ep=EPISODES,
-        num_step=STEPS,
-        updt_freq=UPDATE_FREQ,
-        sw_freq=TARGET_FREQ,
-        is_double=DOUBLE
-    )
-
 def train():
+    run_name = create_run_name(
+            alg='DQN',
+            env='lander',
+            num_layers=NUM_H,
+            hidden_dim=H,
+            eps_start=EPSILON_START,
+            eps_end=EPSILON_END,
+            decay=EPSILON_DECAY,
+            gamma=GAMMA,
+            batch_size=BATCH_SIZE,
+            lr=LR,
+            num_ep=EPISODES,
+            num_step=STEPS,
+            updt_freq=UPDATE_FREQ,
+            sw_freq=TARGET_FREQ,
+            is_double=DOUBLE
+        )
     env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS)
     # Initialize Q networks, replay memory
     agent = DQNAgent(
@@ -150,7 +149,7 @@ def train():
 
 
 if __name__ == "__main__":
-    for lr in [0.001,0.0015,0.002]:
+    for batch_size in [64, 128, 256]:
         # Experimenting with learning rate
-        LR = lr
+        BATCH_SIZE = batch_size
         train()
