@@ -1,3 +1,5 @@
+from cProfile import run
+from cmath import inf
 from pydoc import render_doc
 import time
 import random
@@ -12,19 +14,23 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 import gym
 
+from multiprocessing import Pool
 
-def train():
+
+def train(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_units):
+
+    print ("[{}] INITIALIZING [G={},LR={},ES={},EE={},NH={},H={}]".format(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_units))
     run_name = create_run_name(
             alg='DQN',
             env='lander',
-            num_layers=NUM_H,
-            hidden_dim=H,
-            eps_start=EPSILON_START,
-            eps_end=EPSILON_END,
+            num_layers=t_num_hidden,
+            hidden_dim=t_hidden_units,
+            eps_start=t_eps_start,
+            eps_end=t_eps_end,
             decay=EPSILON_DECAY,
-            gamma=GAMMA,
+            gamma=t_gamma,
             batch_size=BATCH_SIZE,
-            lr=LR,
+            lr=t_lr,
             num_ep=EPISODES,
             num_step=STEPS,
             updt_freq=UPDATE_FREQ,
@@ -32,17 +38,18 @@ def train():
             is_double=DOUBLE
         )
     env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS, run_name=run_name)
+
     # Initialize Q networks, replay memory
     agent = DQNAgent(
         state_size=env.state_size(),
         action_size=env.action_size(),
-        gamma=GAMMA,
+        gamma=t_gamma,
         batch_size=BATCH_SIZE,
-        lr=LR,
-        num_hidden=NUM_H,
-        hidden_units=H,
-        eps_start=EPSILON_START,
-        eps_end=EPSILON_END,
+        lr=t_lr,
+        num_hidden=t_num_hidden,
+        hidden_units=t_hidden_units,
+        eps_start=t_eps_start,
+        eps_end=t_eps_end,
         decay=EPSILON_DECAY,
         exp_decay=EXP_DECAY,
         is_double=DOUBLE
@@ -96,17 +103,18 @@ def train():
                 td_errors.append(td_error)
 
             if done or (t == STEPS - 1):
+                bmr = best_mean_rew
+                if (best_mean_rew == None):
+                    bmr = -inf
                 if episode > WARMUP:
-                    print("EPISODE: {0: <4}/{1: >4} | EXPLORE RATE: {2: <7.4f} | SCORE: {3: <7.1f}"
-                        " | TD ERROR: {4: <5.2f} ".format(episode + 1, EPISODES, epsilon, cum_rew, td_error))
+                    print("[{0}] EPISODE: {1: >4}/{2: >4} | EXPRATE: {3: >7.4f} | SCORE: {4: >7.1f} | TD ERROR: {5: >5.2f} | BMR {6: >9.3f}".format(run_id, episode + 1, EPISODES, epsilon, cum_rew, td_error, bmr))
                 else:
-                    print("EPISODE: {0: <4}/{1: >4} | EXPLORE RATE: {2: <7.4f} | SCORE: {3: <7.1f}"
-                        " | WARMUP - NO TD ERROR".format(episode + 1, EPISODES, epsilon, cum_rew))
+                    print("[{0}] EPISODE: {1: >4}/{2: >4} | EXPRATE: {3: >7.4f} | SCORE: {4: >7.1f} | WRMP NO TD ERR | BMR {5: >9.3f}".format(run_id, episode + 1, EPISODES, epsilon, cum_rew, bmr))
 
                 # Live graphs in TensorBoard
                 summary_writer.add_scalar("Score", cum_rew, episode)
                 summary_writer.add_scalar("Explore rate", epsilon, episode)
-                summary_writer.add_scalar('TD Error', td_error, episode)
+                summary_writer.add_scalar("TD Error", td_error, episode)
 
                 results.append(cum_rew)
 
@@ -116,8 +124,8 @@ def train():
                     if best_mean_rew is None or best_mean_rew < mean_reward:
                                 best_network = agent.current.state_dict()
                                 best_mean_rew = mean_reward
-                                if best_mean_rew is not None:
-                                    print(f'Best mean reward updated {best_mean_rew:.3f}')
+                                # if best_mean_rew is not None:
+                                #     print(f'Best mean reward updated {best_mean_rew:.3f}')
                 if done:
                     break
             
@@ -132,24 +140,48 @@ def train():
     total_time = end - start
 
     # Saving parameters for model with biggest cumulative reward
-    torch.save(best_network, os.path.join(BEST_MODELS,run_name + '-best.dat'))
+    torch.save(best_network, os.path.join(BEST_MODELS, "[" + run_id + "]" + run_name + '-best.dat'))
 
     print()
-    print("TOTAL EPISODES: {0: <4} | TOTAL UPDATE STEPS: {1: <7} | TOTAL TIME [s]: {2: <7.2f}"
-        .format(EPISODES, len(td_errors), total_time))
-    print("EP PER SECOND: {0: >10.6f}".format(total_time / EPISODES))
-    print("STEP PER SECOND: {0: >8.6f}".format(total_time / len(td_errors)))
+    print("[{0}] TOTAL EPISODES: {1: <4} | TOTAL UPDATE STEPS: {2: <7} | TOTAL TIME [s]: {3: <7.2f}".format(run_id, EPISODES, len(td_errors), total_time))
+    print("[{0}] EP PER SECOND: {1: >10.6f}".format(run_id, total_time / EPISODES))
+    print("[{0}] STEP PER SECOND: {1: >8.6f}".format(run_id, total_time / len(td_errors)))
 
     fig = visualize_result(
         returns=results,
         td_errors=td_errors,
         policy_errors=None
     )
-    fig.savefig(os.path.join(GRAPH_PATH, run_name + '.png'), dpi=400)
+    fig.savefig(os.path.join(GRAPH_PATH, "[" + run_id + "]" + run_name + '.png'), dpi=400)
+
+    return run_id
+
+
+def yoink(x, k):
+    print("ENTERING FOR", x, "-", k)
+
+    for i in range(x):
+        print("  #:", i, "/", x)
+
+    print("LEAVING FOR", x, "-", k)
+
+    return x
 
 
 if __name__ == "__main__":
-    for batch_size in [64, 128, 256]:
-        # Experimenting with learning rate
-        BATCH_SIZE = batch_size
-        train()
+    args = []
+
+    for lrid, lr in [ ("L15", 0.0015), ("L10", 0.001), ("L05", 0.0005) ]:
+        for esid, eps_start in [ ("E5", 0.5), ("E7", 0.75) ]:
+            for gmid, gamma in [ ("G1", 0.99), ("G2", 0.995) ]:
+                args.append( (lrid + "-" + esid + "-" + gmid, gamma, lr, eps_start, EPSILON_END, NUM_H, H) )
+
+    with Pool() as pool:
+            # Experimenting with learning rate
+        # LR = lr
+        # train()
+        res = [pool.apply_async(train, arg) for arg in args]
+
+        print("ASDF")
+
+        res = [r.get() for r in res]
