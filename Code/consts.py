@@ -23,10 +23,10 @@ EPSILON_DECAY =  0.005 #0.00002
 # Exponential decay indicator
 EXP_DECAY = False
 # Discount rate
-GAMMA = 0.99
+GAMMA = 0.995
 # DQN Target network update
 # frequency in EPISODES
-TARGET_FREQ = 15
+TARGET_FREQ = 20
 # DQN live network update
 # frequency in STEPS
 UPDATE_FREQ = 1
@@ -40,17 +40,17 @@ ENV_NAME = 'LunarLander-v2'
 # Folder name for storing best models
 BEST_MODELS = './best_models'
 # Warmup period
-WARMUP = 100
+WARMUP = 120
 # Period for calculating mean rolling average
-ROLLING_PERIOD = 100
+ROLLING_PERIOD = 120
 # Using Double Q-Learning
 DOUBLE = True
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
 # of H units
-NUM_H = 3
+NUM_H = 2
 # Number of units in hidden
 # layers
-H = 32
+H = 16
 # ### HYPER PARAMETERS END #######
