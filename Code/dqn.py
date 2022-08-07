@@ -77,7 +77,7 @@ class DQNAgent(object):
         else:
             # Linear decay
             if curr_eps > self.eps_end:
-                curr_eps = max(curr_eps * (1-self.epsilon_decay), self.eps_end)
+                curr_eps = max(curr_eps * (1-self.decay), self.eps_end)
             return curr_eps
 
     def backward(self):

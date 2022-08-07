@@ -15,7 +15,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # ### TRAINING ##################
 # Start exploration rate
 # for eps greedy policy
-EPSILON_START = 1.0
+EPSILON_START = 0.5
 # End exploration rate
 EPSILON_END = 0.01 # 0.001
 # Exploration rate decay per EPISODE
@@ -40,17 +40,17 @@ ENV_NAME = 'LunarLander-v2'
 # Folder name for storing best models
 BEST_MODELS = './best_models'
 # Warmup period
-WARMUP = 50
+WARMUP = 100
 # Period for calculating mean rolling average
-ROLLING_PERIOD = 50
+ROLLING_PERIOD = 100
 # Using Double Q-Learning
 DOUBLE = True
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
 # of H units
-NUM_H = 2
+NUM_H = 3
 # Number of units in hidden
 # layers
-H = 64
+H = 32
 # ### HYPER PARAMETERS END #######
