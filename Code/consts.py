@@ -5,7 +5,7 @@ GRAPH_PATH = './graphs'
 
 # ### EPISODE ###################
 # Number of episodes to train for
-EPISODES = 600
+EPISODES = 650
 # Number of steps per episode
 STEPS = 1000
 
@@ -23,7 +23,7 @@ EPSILON_DECAY =  0.005 #0.00002
 # Exponential decay indicator
 EXP_DECAY = False
 # Discount rate
-GAMMA = 0.995
+GAMMA = 0.999
 # DQN Target network update
 # frequency in EPISODES
 TARGET_FREQ = 20
@@ -31,7 +31,7 @@ TARGET_FREQ = 20
 # frequency in STEPS
 UPDATE_FREQ = 1
 # Learning rate
-LR = 0.0005 # 0.00015
+LR = 0.001 # 0.00015
 # Batch size
 BATCH_SIZE = 128 #256
 # Environment name
@@ -40,11 +40,13 @@ ENV_NAME = 'LunarLander-v2'
 # Folder name for storing best models
 BEST_MODELS = './best_models'
 # Warmup period
-WARMUP = 120
+WARMUP = 100
 # Period for calculating mean rolling average
-ROLLING_PERIOD = 120
+ROLLING_PERIOD = 100
 # Using Double Q-Learning
 DOUBLE = True
+# Size of replay buffer
+REPLAY_SIZE = 5e5
 
 # ### NETWORK ARCHITECTURE ######
 # Number of hidden layers
