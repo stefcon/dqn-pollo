@@ -13,7 +13,7 @@ import gym
 
 
 def play(model, episodes = 10):
-    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True, render_mode='human'), steps=STEPS)
+    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True, render_mode='human'), steps=STEPS, film_video=False)
     agent = DQNAgent(
         state_size=env.state_size(),
         action_size=env.action_size(),
@@ -35,7 +35,7 @@ def play(model, episodes = 10):
             total_reward += reward
 
             if done:
-                print("EPISODE: {0: <4}/{1: >4} | SCORE: {3: <7.1f}".format(episode + 1, EPISODES, total_reward))
+                print("EPISODE: {0: <4}/{1: >4} | SCORE: {2: <7.1f}".format(episode + 1, episodes, total_reward))
                 break
             state = next_state
 

@@ -3,14 +3,15 @@ import os
 
 
 class EnvWrapper(object):
-    def __init__(self, gym_env, frame_num=1, steps=None, run_name='test'):
+    def __init__(self, gym_env, frame_num=1, steps=None, film_video=True, run_name='test'):
         self.env = gym_env
         self.frame_num = frame_num
         if steps is not None:
             self.env._max_episode_steps = steps
-        self.env = wrappers.RecordVideo(
-            self.env, os.path.join('./video_folder/'+run_name, self.env.spec.id), 
-            episode_trigger= lambda x: x % 50 == 0, new_step_api=True)
+        if film_video:
+            self.env = wrappers.RecordVideo(
+                self.env, os.path.join('./video_folder/'+run_name, self.env.spec.id), 
+                episode_trigger= lambda x: x % 50 == 0, new_step_api=True)
 
     def state_size(self):
         return self.env.observation_space.shape[0]
