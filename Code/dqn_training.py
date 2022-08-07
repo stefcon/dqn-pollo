@@ -16,42 +16,21 @@ import gym
 
 from multiprocessing import Pool
 
-<<<<<<< HEAD
-run_name = create_run_name(
-        alg='DQN',
-        env='lander',
-        num_layers=NUM_H,
-        hidden_dim=H,
-        eps_start=EPSILON_START,
-        eps_end=EPSILON_END,
-        decay=EPSILON_DECAY,
-        gamma=GAMMA,
-        batch_size=BATCH_SIZE,
-        lr=LR,
-        num_ep=EPISODES,
-        num_step=STEPS,
-        updt_freq=UPDATE_FREQ,
-        sw_freq=TARGET_FREQ,
-        is_double=DOUBLE
-    )
 
 def train(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_units):
 
     print ("[{}] INITIALIZING [G={},LR={},ES={},EE={},NH={},H={}]".format(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_units))
-    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS)
-=======
-def train():
     run_name = create_run_name(
             alg='DQN',
             env='lander',
-            num_layers=NUM_H,
-            hidden_dim=H,
-            eps_start=EPSILON_START,
-            eps_end=EPSILON_END,
+            num_layers=t_num_hidden,
+            hidden_dim=t_hidden_units,
+            eps_start=t_eps_start,
+            eps_end=t_eps_end,
             decay=EPSILON_DECAY,
-            gamma=GAMMA,
+            gamma=t_gamma,
             batch_size=BATCH_SIZE,
-            lr=LR,
+            lr=t_lr,
             num_ep=EPISODES,
             num_step=STEPS,
             updt_freq=UPDATE_FREQ,
@@ -59,7 +38,7 @@ def train():
             is_double=DOUBLE
         )
     env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS, run_name=run_name)
->>>>>>> stefan
+
     # Initialize Q networks, replay memory
     agent = DQNAgent(
         state_size=env.state_size(),
@@ -190,7 +169,6 @@ def yoink(x, k):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     args = []
 
     for lrid, lr in [ ("L15", 0.0015), ("L10", 0.001), ("L05", 0.0005) ]:
@@ -207,9 +185,3 @@ if __name__ == "__main__":
         print("ASDF")
 
         res = [r.get() for r in res]
-=======
-    for batch_size in [64, 128, 256]:
-        # Experimenting with learning rate
-        BATCH_SIZE = batch_size
-        train()
->>>>>>> stefan
