@@ -12,8 +12,11 @@ import torch
 import gym
 
 
-def play(model, episodes = 10):
-    env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True, render_mode='human'), steps=STEPS, film_video=False)
+def play(model, episodes = 10, render=True):
+    if render:
+        env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True, render_mode='human'), steps=STEPS, film_video=False)
+    else:
+        env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS, film_video=False)
     agent = DQNAgent(
         state_size=env.state_size(),
         action_size=env.action_size(),
@@ -43,10 +46,12 @@ def play(model, episodes = 10):
 if __name__ == '__main__':
     model = None
     episodes = 10
+    render = False
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-m','--model', type=str, required=True)
     parser.add_argument('-e','--episodes', type=int, required=False)
+    parser.add_argument('-r','--render', type=bool, required=False)
     # Parse the argument
     args = parser.parse_args()
     
@@ -54,5 +59,7 @@ if __name__ == '__main__':
 
     if args.episodes:
         episodes = args.episodes
+    if args.render:
+        render = args.render
     
-    play(model, episodes)
+    play(model, episodes, render)
