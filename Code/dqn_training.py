@@ -17,7 +17,7 @@ import gym
 from multiprocessing import Pool
 
 
-def train(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_units):
+def train(run_id, t_gamma, t_lr, t_eps_start, t_batch_size, t_sw_freq, t_eps_end, t_num_hidden, t_hidden_units):
 
     print ("[{}] INITIALIZING [G={},LR={},ES={},EE={},NH={},H={}]".format(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_units))
     run_name = create_run_name(
@@ -29,12 +29,12 @@ def train(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_
             eps_end=t_eps_end,
             decay=EPSILON_DECAY,
             gamma=t_gamma,
-            batch_size=BATCH_SIZE,
+            batch_size=t_batch_size,
             lr=t_lr,
             num_ep=EPISODES,
             num_step=STEPS,
             updt_freq=UPDATE_FREQ,
-            sw_freq=TARGET_FREQ,
+            sw_freq=t_sw_freq,
             is_double=DOUBLE
         )
     env = EnvWrapper(gym_env=gym.make(ENV_NAME, new_step_api=True), steps=STEPS, run_name=run_name)
@@ -73,6 +73,10 @@ def train(run_id, t_gamma, t_lr, t_eps_start, t_eps_end, t_num_hidden, t_hidden_
         # Start game/episode
         state = env.reset()
         cum_rew = 0
+
+        # Early stopping
+        if best_mean_rew is not None and best_mean_rew > 210.0:
+            break
 
         if episode > WARMUP and episode % TARGET_FREQ == 0:
             agent.update_target_model()
@@ -171,12 +175,14 @@ def yoink(x, k):
 if __name__ == "__main__":
     args = []
 
-    for lrid, lr in [ ("L15", 0.0015), ("L10", 0.001), ("L05", 0.0005) ]:
-        for esid, eps_start in [ ("E5", 0.5), ("E7", 0.75) ]:
-            for gmid, gamma in [ ("G1", 0.99), ("G2", 0.995) ]:
-                args.append( (lrid + "-" + esid + "-" + gmid, gamma, lr, eps_start, EPSILON_END, NUM_H, H) )
+    for lrid, lr in [ ("L15", 0.0015), ("L10", 0.001) ]:
+        for esid, eps_start in [ ("E1", 1.0) ]:
+            for gmid, gamma in [ ("G2", 0.995), ("GK", 0.999) ]:
+                for bmid, b_s in [ ("B064", 64) ]:
+                    for tid, target_f in [ ("T10", 10), ("T15", 15) ]:
+                        args.append( (lrid + "-" + esid + "-" + gmid + "-" + bmid + "-" + tid, gamma, lr, eps_start, b_s, target_f, EPSILON_END, NUM_H, H))
 
-    with Pool() as pool:
+    with Pool(processes=4) as pool:
             # Experimenting with learning rate
         # LR = lr
         # train()
