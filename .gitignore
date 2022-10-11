@@ -1,0 +1,7 @@
+.ipynb_checkpoints/
+.vscode/
+envs/
+**/__pycache__/
+**/tmp_*/
+runs/
+video_folder/
