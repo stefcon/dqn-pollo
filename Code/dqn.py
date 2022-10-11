@@ -5,13 +5,14 @@ import time
 import numpy as np
 from consts import *
 
-from nets import DQN
+from nets import DQN, DuelingDQN
 from rb import ReplayBuffer
 
 
 class DQNAgent(object):
     def __init__(self, state_size, action_size, gamma=0.95, batch_size=256, lr=0.00025, num_hidden=2,
-                 hidden_units=64, eps_start=1, eps_end=0.2, decay=0.05, exp_decay=False, is_double=False):
+                 hidden_units=64, eps_start=1, eps_end=0.2, decay=0.05, exp_decay=False, is_double=False,
+                 is_dueling=False):
         self.action_size = action_size
         self.state_size = state_size
         self.gamma = gamma
@@ -23,8 +24,12 @@ class DQNAgent(object):
         self.name = 'DQN'
 
         # We create "live" and "target" networks from the original paper.
-        self.current = DQN(state_size, action_size, h=hidden_units, num_hidden=num_hidden).to(DEVICE)
-        self.target = DQN(state_size, action_size, h=hidden_units, num_hidden=num_hidden).to(DEVICE)
+        if is_dueling:
+            self.current = DuelingDQN(state_size, action_size, h=hidden_units, num_hidden=num_hidden).to(DEVICE)
+            self.target = DuelingDQN(state_size, action_size, h=hidden_units, num_hidden=num_hidden).to(DEVICE)
+        else:
+            self.current = DQN(state_size, action_size, h=hidden_units, num_hidden=num_hidden).to(DEVICE)
+            self.target = DQN(state_size, action_size, h=hidden_units, num_hidden=num_hidden).to(DEVICE)
         for p in self.target.parameters():
             p.requires_grad = False
         self.update_target_model()
